@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caesar Cipher</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <table class="table">
+            <tr>
+                <td class="text-center font-weight-bold" style="font-size: 25px;">CAESAR CIPHER</td>
+            </tr>
+            <tr>
+                <td class="font-weight-bold text-primary">ENCRYPTION</td>
+            </tr>
+            <tr>
+                <td>
+                    <form id="encrypt-form" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="inputPlainText" class="form-label">Plain Text:</label>
+                            <input type="text" class="form-control" id="inputPlainText" name="plain_text" 
+                                   placeholder="Input Plain Text" required autofocus>
+                            <div class="invalid-feedback">
+                                Please enter plain text.
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputKeyPlain" class="form-label">Key:</label>
+                            <input type="number" class="form-control" id="inputKeyPlain" name="key" 
+                                   placeholder="Input Key" min="0" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid key (positive number).
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Encrypt</button>
+                    </form>
+                    <div id="encrypt-result" class="alert alert-info mt-3" style="display: none;">
+                        <strong>Encryption Result:</strong><br>
+                        Plain Text: <span id="encrypt-text"></span><br>
+                        Key: <span id="encrypt-key"></span><br>
+                        Cipher Text: <span id="encrypt-output"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="font-weight-bold text-primary">DECRYPTION</td>
+            </tr>
+            <tr>
+                <td>
+                    <form id="decrypt-form" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="inputCipherText" class="form-label">Cipher Text:</label>
+                            <input type="text" class="form-control" id="inputCipherText" name="cipher_text" 
+                                   placeholder="Input Cipher Text" required>
+                            <div class="invalid-feedback">
+                                Please enter cipher text.
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputKeyCipher" class="form-label">Key:</label>
+                            <input type="number" class="form-control" id="inputKeyCipher" name="key" 
+                                   placeholder="Input Key" min="0" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid key (positive number).
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">Decrypt</button>
+                    </form>
+                    <div id="decrypt-result" class="alert alert-info mt-3" style="display: none;">
+                        <strong>Decryption Result:</strong><br>
+                        Cipher Text: <span id="decrypt-text"></span><br>
+                        Key: <span id="decrypt-key"></span><br>
+                        Plain Text: <span id="decrypt-output"></span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function () {
+            'use strict';
+            window.addEventListener('load', function () {
+                // Bootstrap form validation
+                var forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.filter.call(forms, function (form) {
+                    form.addEventListener('submit', function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (form.checkValidity()) {
+                            var formData = new FormData(form);
+                            var isEncrypt = form.id === 'encrypt-form';
+                            var url = isEncrypt ? '/api/caesar/encrypt' : '/api/caesar/decrypt';
+                            var resultDiv = isEncrypt ? '#encrypt-result' : '#decrypt-result';
+                            var textSpan = isEncrypt ? '#encrypt-text' : '#decrypt-text';
+                            var keySpan = isEncrypt ? '#encrypt-key' : '#decrypt-key';
+                            var outputSpan = isEncrypt ? '#encrypt-output' : '#decrypt-output';
+                            
+                            $.ajax({
+                                url: url,
+                                type: 'POST',
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                                success: function (response) {
+                                    $(resultDiv).removeClass('alert-danger').addClass('alert-info').show();
+                                    $(textSpan).text(response.text);
+                                    $(keySpan).text(response.key);
+                                    $(outputSpan).text(response.output);
+                                },
+                                error: function (xhr) {
+                                    $(resultDiv).removeClass('alert-info').addClass('alert-danger').show();
+                                    $(textSpan).text('');
+                                    $(keySpan).text('');
+                                    $(outputSpan).text(xhr.responseJSON.error || 'An error occurred');
+                                }
+                            });
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+</body>
+</html>
